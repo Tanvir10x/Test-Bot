@@ -10,7 +10,7 @@ logging.basicConfig(
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     copy_button = InlineKeyboardButton(
-        text="Copy Code", 
+        text="123-456", 
         copy_text=CopyTextButton(text="123456")
     )
     
@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        "Click the button below to copy the code:", reply_markup=reply_markup
+        "OTP Receive 💥", reply_markup=reply_markup
     )
 
 if __name__ == "__main__":
