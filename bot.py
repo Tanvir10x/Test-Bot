@@ -17,9 +17,9 @@ from telegram.ext import (
 # =============================================
 #              CONFIG
 # =============================================
-BOT_TOKEN = "8969508457:AAHy4fS09L7PoTdQQYdQmrKZbqe9QtTwFSs"
-STEXSMS_EMAIL = "srmansurgaming@gmail.com"
-STEXSMS_PASSWORD = "@Tanvir349534@"
+BOT_TOKEN = ""
+STEXSMS_EMAIL = ""
+STEXSMS_PASSWORD = ""
 BASE_URL = "https://stexsms.com/mapi/v1"
 ADMIN_ID = 6502100973
 CHANNEL_USERNAME = "@Virtual_Range_Group"
