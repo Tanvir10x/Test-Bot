@@ -514,7 +514,7 @@ def country_select_inline(countries, app_name):
         buttons.append([InlineKeyboardButton(
             f"{flag} {c}", callback_data=f"country_{c}"
         )])
-    buttons.append([InlineKeyboardButton("◀️ Back", callback_data="back_app")])
+    buttons.append([InlineKeyboardButton("🔙 Back", callback_data="back_app")])
     return InlineKeyboardMarkup(buttons)
 
 def carrier_select_inline(carriers, app_name, country):
@@ -523,7 +523,7 @@ def carrier_select_inline(carriers, app_name, country):
         buttons.append([InlineKeyboardButton(
             f"📶 {c}", callback_data=f"carrier_{c}"
         )])
-    buttons.append([InlineKeyboardButton("◀️ Back", callback_data=f"back_country_{app_name}")])
+    buttons.append([InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")])
     return InlineKeyboardMarkup(buttons)
 
 def range_select_inline(ranges, app_name, country, carrier):
@@ -533,7 +533,7 @@ def range_select_inline(ranges, app_name, country, carrier):
             f"📡 {r['range']}", callback_data=f"range_{r['range']}"
         )])
     buttons.append([InlineKeyboardButton(
-        "◀️ Back", callback_data=f"back_carrier_{app_name}|{country}"
+        "🔙 Back", callback_data=f"back_carrier_{app_name}|{country}"
     )])
     return InlineKeyboardMarkup(buttons)
 
@@ -547,18 +547,14 @@ def admin_keyboard():
 
 def after_number_inline(number, range_val):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("👁️ Check OTP", url="https://t.me/Virtual_Range_Group")],
-        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}"),
-         InlineKeyboardButton("📊 View Range", callback_data=f"viewrange_{range_val}")],
-        [InlineKeyboardButton("🛑 Stop Auto OTP", callback_data="stop_auto"),
-         InlineKeyboardButton("🏠 Home", callback_data="go_home")],
+        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}")],
+        [InlineKeyboardButton("🔙 Back", callback_data="back_app")],
     ])
 
 def otp_not_found_inline(number, range_val):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("👁️ Check OTP", url="https://t.me/Virtual_Range_Group")],
-        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}"),
-         InlineKeyboardButton("🏠 Home", callback_data="go_home")],
+        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}")],
+        [InlineKeyboardButton("🔙 Back", callback_data="back_app")],
     ])
 
 # =============================================
@@ -636,7 +632,7 @@ async def auto_otp_multi(message, numbers, user_id, range_val, bot=None):
     ]
 
     try:
-        await asyncio.wait_for(otp_found_event.wait(), timeout=300)
+        await asyncio.wait_for(otp_found_event.wait(), timeout=480)
     except asyncio.TimeoutError:
         pass
 
@@ -716,7 +712,7 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
                 f"✅ Number পাওয়া গেছে!\n\n"
                 f"{numbers_text}\n\n"
                 f"📱 {app}  {flag} {country_r}\n\n"
-                f"🔍 OTP আসার অপেক্ষায়...",
+                f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
             )
@@ -1025,7 +1021,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not countries:
             await query.edit_message_text(
                 f"❌ {app_name} এ এখন কোনো active country নেই।",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Back", callback_data="back_app")]])
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="back_app")]])
             )
             return
         emoji = APP_EMOJIS.get(app_name, "📱")
@@ -1061,7 +1057,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not ranges:
             await query.edit_message_text(
                 f"❌ {country} তে কোনো range নেই।",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Back", callback_data=f"back_country_{app_name}")]])
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")]])
             )
             return
         flag = get_flag(country)
@@ -1092,7 +1088,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not ranges:
             await query.edit_message_text(
                 "❌ কোনো range পাওয়া যায়নি।",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Back", callback_data=f"back_country_{app_name}")]])
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")]])
             )
             return
         flag = get_flag(country)
@@ -1140,7 +1136,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"✅ Number পাওয়া গেছে!\n\n"
                 f"{numbers_text}\n\n"
                 f"📱 {app_name}  {flag} {country_r}\n\n"
-                f"🔍 OTP আসার অপেক্ষায়...",
+                f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
             )
@@ -1150,7 +1146,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "❌ Number পাওয়া যায়নি!",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔄 Try Again", callback_data=f"range_{range_val}")],
-                    [InlineKeyboardButton("◀️ Back", callback_data="back_app")]
+                    [InlineKeyboardButton("🔙 Back", callback_data="back_app")]
                 ])
             )
 
@@ -1189,7 +1185,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"✅ Number পাওয়া গেছে!\n\n"
                 f"{numbers_text}\n\n"
                 f"📱 {app_name}  {flag} {country_r}\n\n"
-                f"🔍 OTP আসার অপেক্ষায়...",
+                f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
             )
