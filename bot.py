@@ -166,7 +166,7 @@ COUNTRY_FLAGS = {
     "TJ": "🇹🇯", "TG": "🇹🇬", "NG": "🇳🇬", "GH": "🇬🇭",
     "KE": "🇰🇪", "BD": "🇧🇩", "IN": "🇮🇳", "PH": "🇵🇭",
     "ID": "🇮🇩", "MM": "🇲🇲", "KH": "🇰🇭", "ET": "🇪🇹",
-    "CD": "🇨🇩", "MZ": "🇲🇿", "MG": "🇲🇬", "CI": "🇨🇮",
+    "CD": "🇨드로", "MZ": "🇲🇿", "MG": "🇲🇬", "CI": "🇨🇮",
     "SN": "🇸🇳", "ML": "🇲🇱", "BF": "🇧🇫", "GN": "🇬🇳",
     "ZM": "🇿🇲", "ZW": "🇿🇼", "RW": "🇷🇼", "UG": "🇺🇬",
     "AO": "🇦🇴", "SD": "🇸🇩", "MR": "🇲🇷", "NE": "🇳🇪",
@@ -694,8 +694,11 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
         return
 
     if count == 1:
-        # Changed to get 4 numbers together
+        # Get 4 numbers together and show in one message
         numbers_list = []
+        country_r = ""
+        flag = "🌍"
+        
         for _ in range(4):
             data = await api_get_number(range_val, app)
             if data.get("meta", {}).get("code") == 200:
@@ -706,16 +709,17 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
                 user_data[user_id]["last_number"] = number
                 user_data[user_id]["auto_otp_cancel"] = False
                 flag = get_flag(country_r)
-                clean_number = str(number).replace("+", "").strip()
-                await message.reply_text(
-                    f"✅ Number পাওয়া গেছে!\n\n"
-                    f"📞 `{clean_number}`\n"
-                    f"📱 {app}  {flag} {country_r}\n\n"
-                    f"🔍 OTP আসার অপেক্ষায়...",
-                    parse_mode="Markdown",
-                    reply_markup=after_number_inline(number, range_val)
-                )
+
         if numbers_list:
+            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            await message.reply_text(
+                f"✅ Number পাওয়া গেছে!\n\n"
+                f"{numbers_text}\n\n"
+                f"📱 {app}  {flag} {country_r}\n\n"
+                f"🔍 OTP আসার অপেক্ষায়...",
+                parse_mode="Markdown",
+                reply_markup=after_number_inline(numbers_list[0], range_val)
+            )
             asyncio.create_task(auto_otp_multi(message, numbers_list, user_id, range_val, bot=bot))
         else:
             await message.reply_text("❌ Number পাওয়া যায়নি!", reply_markup=main_keyboard(user_id))
@@ -1117,6 +1121,9 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id]["auto_otp_cancel"] = False
         
         numbers_list = []
+        country_r = country
+        flag = "🌍"
+        
         for _ in range(4):
             data_r = await api_get_number(range_val, app_name)
             if data_r.get("meta", {}).get("code") == 200:
@@ -1126,16 +1133,17 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 country_r = num.get("country", country)
                 user_data[user_id]["last_number"] = number
                 flag = get_flag(country_r)
-                clean_number = str(number).replace("+", "").strip()
-                await query.message.reply_text(
-                    f"✅ Number পাওয়া গেছে!\n\n"
-                    f"📞 `{clean_number}`\n"
-                    f"📱 {app_name}  {flag} {country_r}\n\n"
-                    f"🔍 OTP আসার অপেক্ষায়...",
-                    parse_mode="Markdown",
-                    reply_markup=after_number_inline(number, range_val)
-                )
+
         if numbers_list:
+            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            await query.message.reply_text(
+                f"✅ Number পাওয়া গেছে!\n\n"
+                f"{numbers_text}\n\n"
+                f"📱 {app_name}  {flag} {country_r}\n\n"
+                f"🔍 OTP আসার অপেক্ষায়...",
+                parse_mode="Markdown",
+                reply_markup=after_number_inline(numbers_list[0], range_val)
+            )
             asyncio.create_task(auto_otp_multi(query.message, numbers_list, user_id, range_val, bot=context.bot))
         else:
             await query.edit_message_text(
@@ -1162,6 +1170,9 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id]["auto_otp_cancel"] = False
         
         numbers_list = []
+        country_r = country
+        flag = "🌍"
+        
         for _ in range(4):
             data_r = await api_get_number(range_val, app_name)
             if data_r.get("meta", {}).get("code") == 200:
@@ -1171,16 +1182,17 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 country_r = num.get("country", country)
                 user_data[user_id]["last_number"] = number
                 flag = get_flag(country_r)
-                clean_number = str(number).replace("+", "").strip()
-                await query.message.reply_text(
-                    f"✅ Number পাওয়া গেছে!\n\n"
-                    f"📞 `{clean_number}`\n"
-                    f"📱 {app_name}  {flag} {country_r}\n\n"
-                    f"🔍 OTP আসার অপেক্ষায়...",
-                    parse_mode="Markdown",
-                    reply_markup=after_number_inline(number, range_val)
-                )
+
         if numbers_list:
+            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            await query.message.reply_text(
+                f"✅ Number পাওয়া গেছে!\n\n"
+                f"{numbers_text}\n\n"
+                f"📱 {app_name}  {flag} {country_r}\n\n"
+                f"🔍 OTP আসার অপেক্ষায়...",
+                parse_mode="Markdown",
+                reply_markup=after_number_inline(numbers_list[0], range_val)
+            )
             asyncio.create_task(auto_otp_multi(query.message, numbers_list, user_id, range_val, bot=context.bot))
         else:
             await query.message.reply_text("❌ Number পাওয়া যায়নি!", reply_markup=main_keyboard(user_id))
