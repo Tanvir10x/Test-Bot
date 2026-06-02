@@ -6,6 +6,7 @@ import time
 import httpx
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from telegram import (
     Update, InlineKeyboardMarkup, InlineKeyboardButton,
     ReplyKeyboardMarkup, KeyboardButton
@@ -18,6 +19,7 @@ from telegram.ext import (
 # =============================================
 #              CONFIG (Updated for Env)
 # =============================================
+load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 STEXSMS_EMAIL = os.getenv("STEXSMS_EMAIL")
 STEXSMS_PASSWORD = os.getenv("STEXSMS_PASSWORD")
