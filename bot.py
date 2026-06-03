@@ -286,8 +286,8 @@ async def send_otp_to_channel(bot, number, otp, app, country, flag):
         app_cap = app.capitalize()
         hidden_num = await hide_number(number)
         msg = (
-            f"🔔 New OTP\n\n"
-            f"📱 App: {app_cap}\n"
+            f"🔥 OTP Received\n\n"
+            f"✅ Service {app_cap}\n"
             f"🌎 Country: {country} {flag}\n"
             f"📞 Number: {hidden_num}\n"
             f"🔑 OTP: `{otp}`\n"
@@ -486,7 +486,7 @@ def init_user(user_id):
 
 def main_keyboard(user_id=None):
     buttons = [
-        [KeyboardButton("🏠 Start"), KeyboardButton("🎯 Custom Range")],
+        [KeyboardButton("📲 Get Number"), KeyboardButton("🎯 Custom Range")],
         [KeyboardButton("📋 My Numbers"), KeyboardButton("📦 Bulk Number")],
     ]
     if user_id and user_id == ADMIN_ID:
@@ -657,8 +657,8 @@ async def auto_otp_multi(message, numbers, user_id, range_val, bot=None):
         # User কে OTP দেখাও
         await message.reply_text(
             f"🌎 Country : {found_country} {app_cap} {flag}\n"
-            f"🔢 Number : `{clean_found_num}`\n"
-            f"🔑 OTP : `{found_otp}`",
+            f"✅ Number : `{clean_found_num}`\n"
+            f"🔥 OTP : `{found_otp}`",
             parse_mode="Markdown",
             reply_markup=main_keyboard(user_id)
         )
@@ -709,7 +709,7 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
         if numbers_list:
             numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
             await message.reply_text(
-                f"✅ Number পাওয়া গেছে!\n\n"
+                f"✅ Number পাওয়া গেছে।\n\n"
                 f"{numbers_text}\n\n"
                 f"📱 {app}  {flag} {country_r}\n\n"
                 f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
@@ -780,8 +780,8 @@ async def do_otp_check(message, number, user_id=None, bot=None):
             app_cap = detected_app.capitalize()
             await message.reply_text(
                 f"🌎 Country : {country_r} {app_cap} {flag}\n"
-                f"🔢 Number : `{clean_num_display}`\n"
-                f"🔑 OTP : `{otp}`",
+                f"✅ Number : `{clean_num_display}`\n"
+                f"🔥 OTP : `{otp}`",
                 parse_mode="Markdown",
                 reply_markup=main_keyboard(user_id)
             )
@@ -828,12 +828,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"👇  নিচে Service Select করুন\n"
         f"━━━━━━━━━━━━━━━━━━",
         reply_markup=main_keyboard(user_id)
-    )
-
-    # App select menu
-    await update.message.reply_text(
-        "📱 Service Select করুন:",
-        reply_markup=app_select_inline()
     )
 
 async def cmd_get(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1287,14 +1281,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if text == "🏠 Start":
-        await start(update, context)
+    if text == "📲 Get Number":
+        await update.message.reply_text(
+            "📱 Service Select করুন:",
+            reply_markup=app_select_inline()
+        )
         return
 
     if text == "🎯 Custom Range":
         user_data[user_id]["waiting_for"] = "custom_range"
         await update.message.reply_text(
-            "📡 Range লিখুন:\n\nউদাহরণ: 23762155XXX",
+            "📡 Range লিখুন:\n\nউদাহরণ: 12345678XXX",
             reply_markup=main_keyboard(user_id)
         )
         return
