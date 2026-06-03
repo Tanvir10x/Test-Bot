@@ -528,18 +528,18 @@ def range_select_inline(ranges, app_name, country, carrier):
 def admin_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("👥 All Users", callback_data="admin_users"),
-         InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
+         InlineKeyboardButton("📊 Status", callback_data="admin_stats")],
     ])
 
 def after_number_inline(number, range_val):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}")],
+        [InlineKeyboardButton("🔄 Refresh", callback_data=f"same_{range_val}")],
         [InlineKeyboardButton("🔙 Back", callback_data="back_app")],
     ])
 
 def otp_not_found_inline(number, range_val):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔄 Same Range", callback_data=f"same_{range_val}")],
+        [InlineKeyboardButton("🔄 Refresh", callback_data=f"same_{range_val}")],
         [InlineKeyboardButton("🔙 Back", callback_data="back_app")],
     ])
 
@@ -693,11 +693,11 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
                 flag = get_flag(country_r)
 
         if numbers_list:
-            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            numbers_text = "\n".join([f" {flag} `{str(num).replace('+', '').strip()}`🟢" for num in numbers_list])
             await message.reply_text(
-                f"✅ Number পাওয়া গেছে।\n\n"
+                f"📞 Number পাওয়া গেছে।\n\n"
                 f"{numbers_text}\n\n"
-                f"📱 {app}  {flag} {country_r}\n\n"
+                f"✅ {app}  {flag} {country_r}\n\n"
                 f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
@@ -982,7 +982,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
         await query.edit_message_text(
-            f"{app_name}\n\n🌍 Country select করুন:",
+            f"{app_name}\n\n🌍 Country Select করুন।",
             reply_markup=country_select_inline(countries, app_name)
         )
 
@@ -1018,7 +1018,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         flag = get_flag(country)
         await query.edit_message_text(
-            f"📱 {app_name}  |  {flag} {country}\n\n📡 Range select করুন:",
+            f"✅ {app_name}  |  {flag} {country}\n\n📡 Range Select করুন।",
             reply_markup=range_select_inline(ranges, app_name, country, "")
         )
 
@@ -1028,7 +1028,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("⏳ Loading...")
         countries = await get_countries_for_app(app_name)
         await query.edit_message_text(
-            f"{app_name}\n\n🌍 Country select করুন:",
+            f"{app_name}\n\n🌍 Country Select করুন।",
             reply_markup=country_select_inline(countries, app_name)
         )
 
@@ -1048,7 +1048,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         flag = get_flag(country)
         await query.edit_message_text(
-            f"📱 {app_name}  |  {flag} {country}  |  📶 {carrier}\n\n📡 Range select করুন:",
+            f"✅ {app_name}  |  {flag} {country}  |  📶 {carrier}\n\n📡 Range Select করুন।",
             reply_markup=range_select_inline(ranges, app_name, country, carrier)
         )
 
@@ -1060,7 +1060,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         carriers = await get_carriers_for_country(app_name, country)
         flag = get_flag(country)
         await query.edit_message_text(
-            f"📱 {app_name}  |  {flag} {country}\n\n📶 Carrier select করুন:",
+            f"✅ {app_name}  |  {flag} {country}\n\n📶 Carrier select করুন:",
             reply_markup=carrier_select_inline(carriers, app_name, country)
         )
 
@@ -1086,11 +1086,11 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 flag = get_flag(country_r)
 
         if numbers_list:
-            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            numbers_text = "\n".join([f" {flag} `{str(num).replace('+', '').strip()}`🟢" for num in numbers_list])
             await query.message.reply_text(
-                f"✅ Number পাওয়া গেছে!\n\n"
+                f"📞 Number পাওয়া গেছে।\n\n"
                 f"{numbers_text}\n\n"
-                f"📱 {app_name}  {flag} {country_r}\n\n"
+                f"✅ {app_name}  {flag} {country_r}\n\n"
                 f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
@@ -1135,11 +1135,11 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 flag = get_flag(country_r)
 
         if numbers_list:
-            numbers_text = "\n".join([f"📞 `{str(num).replace('+', '').strip()}`" for num in numbers_list])
+            numbers_text = "\n".join([f" {flag} `{str(num).replace('+', '').strip()}`🟢" for num in numbers_list])
             await query.message.reply_text(
-                f"✅ Number পাওয়া গেছে!\n\n"
+                f"📞 Number পাওয়া গেছে।\n\n"
                 f"{numbers_text}\n\n"
-                f"📱 {app_name}  {flag} {country_r}\n\n"
+                f"✅ {app_name}  {flag} {country_r}\n\n"
                 f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
                 parse_mode="Markdown",
                 reply_markup=after_number_inline(numbers_list[0], range_val)
@@ -1270,10 +1270,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"━━━━━━━━━━━━━━━━━━\n"
                 f"👑  ADMIN PANEL\n"
                 f"━━━━━━━━━━━━━━━━━━\n\n"
-                f"📋  /allusers — সব users\n"
-                f"📊  /stats — Bot stats\n"
-                f"🔑  /apistatus — API status\n"
-                f"📢  /broadcast — সবাইকে message\n\n"
+                f"👥  /allusers — সব Users\n"
+                f"📊  /stats — Bot Status\n"
+                f"🔑  /apistatus — API Status\n"
+                f"📢  /broadcast — সবাইকে Message\n\n"
                 f"━━━━━━━━━━━━━━━━━━",
                 reply_markup=admin_keyboard()
             )
