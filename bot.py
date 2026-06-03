@@ -474,8 +474,8 @@ def init_user(user_id):
 
 def main_keyboard(user_id=None):
     buttons = [
-        [KeyboardButton("📱 Get Number"), KeyboardButton("🚦 Traffic")],
-        [KeyboardButton("🆘 Support"), KeyboardButton("📊 Dashboard")],
+        [KeyboardButton("📱 Get Number"), KeyboardButton("🚥 Traffic")],
+        [KeyboardButton("🎧 Support"), KeyboardButton("📊 Dashboard")],
     ]
     if user_id and user_id == ADMIN_ID:
         buttons.append([KeyboardButton("👑 Admin Panel")])
@@ -1233,19 +1233,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if text == "🚦 Traffic":
+    if text == "🚥 Traffic":
         await update.message.reply_text(
-            "Traffic update last one hour\n\n"
-            "গত এক ঘণ্টা কোনো OTP আসে নাই।"
+            "📊 Traffic Update (Last 1 Hour)\n\n"
+            "গত ১ ঘন্টায় কোনো OTP আসেনি।"
         )
         return
 
-    if text == "🆘 Support":
+    if text == "🎧 Support":
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("💬 Contact Support", url=SUPPORT_LINK)]
         ])
         await update.message.reply_text(
-            "সাপোর্ট পেতে নিচের বাটনে ক্লিক করুন:",
+            "যেকোনো সমস্যার জন্য সাপোর্টে যোগাযোগ করুন।",
             reply_markup=keyboard
         )
         return
@@ -1257,8 +1257,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         dashboard_msg = (
             f"👤 Name: {user_name}\n"
             f"🆔 ID: {user_id}\n"
-            f"📅 Today OTP: {stats.get('success_count', 0)}\n"
-            f"🔥 All Time OTP: {stats.get('success_count', 0)}\n"
+            f"📊 Today OTP: {stats.get('success_count', 0)}\n"
+            f"📈 All Time OTP: {stats.get('success_count', 0)}\n"
             f"💰 Balance: 0.00"
         )
         await update.message.reply_text(dashboard_msg, reply_markup=main_keyboard(user_id))
