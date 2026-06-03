@@ -27,6 +27,7 @@ BASE_URL = "https://stexsms.com/mapi/v1"
 ADMIN_ID = 6502100973
 CHANNEL_USERNAME = "@Virtual_Range_Group"
 CHANNEL_LINK = "https://t.me/Virtual_Range_Group"
+SUPPORT_LINK = "http://t.me/THIS_IS_BOSS" # আপনার সাপোর্ট আইডির লিংক এখানে দিন
 
 # OTP Forward Channel
 OTP_CHANNEL_ID = -1003201648701
@@ -473,8 +474,8 @@ def init_user(user_id):
 
 def main_keyboard(user_id=None):
     buttons = [
-        [KeyboardButton("📱 Get Number"), KeyboardButton("🎯 Custom Range")],
-        [KeyboardButton("📋 My Numbers"), KeyboardButton("📊 Dashboard")],
+        [KeyboardButton("📱 Get Number"), KeyboardButton("🚦 Traffic")],
+        [KeyboardButton("🆘 Support"), KeyboardButton("📊 Dashboard")],
     ]
     if user_id and user_id == ADMIN_ID:
         buttons.append([KeyboardButton("👑 Admin Panel")])
@@ -839,29 +840,6 @@ async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🛑 Auto OTP check বন্ধ হয়েছে।",
         reply_markup=main_keyboard(user_id)
     )
-
-async def cmd_mynum(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    await update.message.reply_text("⏳ Loading...")
-    data = await api_get_info()
-    if data.get("meta", {}).get("code") == 200:
-        nums = data["data"].get("numbers", []) or []
-        stats = data["data"].get("stats", {})
-        msg = (
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"📋  My Numbers\n"
-            f"━━━━━━━━━━━━━━━━━━\n\n"
-            f"✅  Success: {stats.get('success_count', 0)}\n"
-            f"⏳  Pending: {stats.get('pending_count', 0)}\n"
-            f"❌  Failed: {stats.get('failed_count', 0)}\n\n"
-        )
-        for n in nums[:10]:
-            e = "✅" if n.get("status") == "success" else "⏳" if n.get("status") == "pending" else "❌"
-            msg += f"{e}  {n.get('number')}  —  {n.get('country', '')}  —  {n.get('last_activity', '')}\n"
-        msg += "\n━━━━━━━━━━━━━━━━━━"
-        await update.message.reply_text(msg, reply_markup=main_keyboard(user_id))
-    else:
-        await update.message.reply_text("❌ Load করতে ব্যর্থ।", reply_markup=main_keyboard(user_id))
 
 # =============================================
 #         ADMIN COMMANDS
@@ -1255,22 +1233,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if text == "🎯 Custom Range":
-        user_data[user_id]["waiting_for"] = "custom_range"
+    if text == "🚦 Traffic":
         await update.message.reply_text(
-            "📡 Range লিখুন:\n\nউদাহরণ: 12345678XXX",
-            reply_markup=main_keyboard(user_id)
+            "Traffic update last one hour\n\n"
+            "গত এক ঘণ্টা কোনো OTP আসে নাই।"
         )
         return
 
-    if user_data[user_id].get("waiting_for") == "custom_range":
-        user_data[user_id]["waiting_for"] = None
-        user_data[user_id]["range"] = text
-        await do_get_number(update.message, user_id, count=1, user_name=user_name, bot=context.bot)
-        return
-
-    if text == "📋 My Numbers":
-        await cmd_mynum(update, context)
+    if text == "🆘 Support":
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💬 Contact Support", url=SUPPORT_LINK)]
+        ])
+        await update.message.reply_text(
+            "সাপোর্ট পেতে নিচের বাটনে ক্লিক করুন:",
+            reply_markup=keyboard
+        )
         return
 
     if text == "📊 Dashboard":
@@ -1338,7 +1315,6 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("stop", cmd_stop))
     app.add_handler(CommandHandler("get", cmd_get))
     app.add_handler(CommandHandler("get100", cmd_get100))
-    app.add_handler(CommandHandler("mynum", cmd_mynum))
     app.add_handler(CommandHandler("allusers", cmd_allusers))
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("apistatus", cmd_apistatus))
