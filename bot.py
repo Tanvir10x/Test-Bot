@@ -43,19 +43,6 @@ user_data = {}
 _console_cache = {"logs": [], "time": 0}
 
 # =============================================
-#         REAL APP LOGOS (Photo URLs)
-# =============================================
-
-APP_EMOJIS = {
-    "FACEBOOK": "📘", "INSTAGRAM": "📸", "TIKTOK": "🎵",
-    "SNAPCHAT": "👻", "TWITTER": "🐦", "GOOGLE": "🔍",
-    "WHATSAPP": "💬", "TELEGRAM": "✈️", "CHATGPT": "🤖",
-    "SHEIN": "👗", "TWILIO": "📞", "TWVERIFY": "✅",
-    "VERIFY": "🔐", "VERIMSG": "💌", "VGSMS": "📡",
-    "WORLDFIRST": "🌏", "GOFUNDME": "💰"
-}
-
-# =============================================
 #         SESSION POOL SYSTEM
 # =============================================
 
@@ -486,8 +473,8 @@ def init_user(user_id):
 
 def main_keyboard(user_id=None):
     buttons = [
-        [KeyboardButton("📲 Get Number"), KeyboardButton("🎯 Custom Range")],
-        [KeyboardButton("📋 My Numbers"), KeyboardButton("📦 Bulk Number")],
+        [KeyboardButton("📱 Get Number"), KeyboardButton("🎯 Custom Range")],
+        [KeyboardButton("📋 My Numbers"), KeyboardButton("📊 Dashboard")],
     ]
     if user_id and user_id == ADMIN_ID:
         buttons.append([KeyboardButton("👑 Admin Panel")])
@@ -500,7 +487,7 @@ def app_select_inline():
         row = apps[:2]
         buttons.append([
             InlineKeyboardButton(
-                f"{APP_EMOJIS.get(a, '📱')} {a.capitalize()}",
+                f"{a.capitalize()}",
                 callback_data=f"app_{a}"
             ) for a in row
         ])
@@ -539,8 +526,6 @@ def range_select_inline(ranges, app_name, country, carrier):
 
 def admin_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("📦 Bulk ON", callback_data="bulk_on"),
-         InlineKeyboardButton("📦 Bulk OFF", callback_data="bulk_off")],
         [InlineKeyboardButton("👥 All Users", callback_data="admin_users"),
          InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
     ])
@@ -1018,9 +1003,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="back_app")]])
             )
             return
-        emoji = APP_EMOJIS.get(app_name, "📱")
         await query.edit_message_text(
-            f"{emoji} {app_name}\n\n🌍 Country select করুন:",
+            f"{app_name}\n\n🌍 Country select করুন:",
             reply_markup=country_select_inline(countries, app_name)
         )
 
@@ -1065,9 +1049,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id]["country"] = None
         await query.edit_message_text("⏳ Loading...")
         countries = await get_countries_for_app(app_name)
-        emoji = APP_EMOJIS.get(app_name, "📱")
         await query.edit_message_text(
-            f"{emoji} {app_name}\n\n🌍 Country select করুন:",
+            f"{app_name}\n\n🌍 Country select করুন:",
             reply_markup=country_select_inline(countries, app_name)
         )
 
@@ -1207,21 +1190,6 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.message.reply_text("❌ Numbers পাওয়া যায়নি।", reply_markup=main_keyboard(user_id))
 
-    elif data == "bulk_on":
-        global GET100_ENABLED
-        if user_id == ADMIN_ID:
-            GET100_ENABLED = True
-            await query.answer("✅ Bulk চালু হয়েছে!")
-            await query.edit_message_reply_markup(reply_markup=admin_keyboard())
-        return
-
-    elif data == "bulk_off":
-        if user_id == ADMIN_ID:
-            GET100_ENABLED = False
-            await query.answer("❌ Bulk বন্ধ হয়েছে!")
-            await query.edit_message_reply_markup(reply_markup=admin_keyboard())
-        return
-
     elif data == "admin_users":
         if user_id == ADMIN_ID:
             msg = f"👥 Total Users: {len(user_data)}\n\n"
@@ -1235,7 +1203,6 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text(
                 f"📊 BOT STATS\n\n"
                 f"👥 Users: {len(user_data)}\n"
-                f"📦 Bulk: {'✅ ON' if GET100_ENABLED else '❌ OFF'}\n"
                 f"🕐 {datetime.now().strftime('%Y-%m-%d %H:%M')}"
             )
         return
@@ -1281,9 +1248,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if text == "📲 Get Number":
+    if text == "📱 Get Number":
         await update.message.reply_text(
-            "📱 Service Select করুন:",
+            "কোন সার্ভিসের নাম্বার চান?",
             reply_markup=app_select_inline()
         )
         return
@@ -1306,18 +1273,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await cmd_mynum(update, context)
         return
 
-    if text == "📦 Bulk Number":
-        if not has_get100_access(user_id):
-            await update.message.reply_text(
-                "❌ Bulk Number এখন বন্ধ আছে।\n\nAdmin চালু করলে use করতে পারবেন।"
-            )
-        else:
-            await do_get_number(update.message, user_id, count=100, user_name=user_name, bot=context.bot)
+    if text == "📊 Dashboard":
+        data = await api_get_info()
+        stats = data.get("data", {}).get("stats", {}) if data.get("meta", {}).get("code") == 200 else {}
+        
+        dashboard_msg = (
+            f"👤 Name: {user_name}\n"
+            f"🆔 ID: {user_id}\n"
+            f"📅 Today OTP: {stats.get('success_count', 0)}\n"
+            f"🔥 All Time OTP: {stats.get('success_count', 0)}\n"
+            f"💰 Balance: 0.00"
+        )
+        await update.message.reply_text(dashboard_msg, reply_markup=main_keyboard(user_id))
         return
 
     if text == "👑 Admin Panel":
         if user_id == ADMIN_ID:
-            get100_status = "✅ ON" if GET100_ENABLED else "❌ OFF"
             await update.message.reply_text(
                 f"━━━━━━━━━━━━━━━━━━\n"
                 f"👑  ADMIN PANEL\n"
@@ -1326,11 +1297,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📊  /stats — Bot stats\n"
                 f"🔑  /apistatus — API status\n"
                 f"📢  /broadcast — সবাইকে message\n\n"
-                f"📦  Bulk Number: {get100_status}\n"
-                f"/get100on — সবার জন্য চালু\n"
-                f"/get100off — সবার জন্য বন্ধ\n"
-                f"/addget100 <id> — নির্দিষ্ট user চালু\n"
-                f"/removeget100 <id> — নির্দিষ্ট user বন্ধ\n\n"
                 f"━━━━━━━━━━━━━━━━━━",
                 reply_markup=admin_keyboard()
             )
