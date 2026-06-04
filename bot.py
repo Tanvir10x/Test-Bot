@@ -32,10 +32,6 @@ SUPPORT_LINK = "http://t.me/THIS_IS_BOSS" # আপনার সাপোর্�
 # OTP Forward Channel
 OTP_CHANNEL_ID = -1003201648701
 
-# Get 100 access control
-GET100_ENABLED = False
-GET100_USERS = set()
-
 logging.basicConfig(level=logging.INFO)
 
 user_data = {}
@@ -143,10 +139,7 @@ class SessionPool:
 session_pool = SessionPool()
 
 ALL_APPS = [
-    "FACEBOOK", "INSTAGRAM", "TIKTOK", "SNAPCHAT",
-    "TWITTER", "GOOGLE", "WHATSAPP", "TELEGRAM",
-    "CHATGPT", "SHEIN", "TWILIO", "TWVERIFY",
-    "VERIFY", "VERIMSG", "VGSMS", "WORLDFIRST", "GOFUNDME"
+    "FACEBOOK", "INSTAGRAM", "WHATSAPP", "TELEGRAM"
 ]
 
 COUNTRY_FLAGS = {
@@ -181,7 +174,7 @@ COUNTRY_FLAGS = {
     "MN": "🇲🇳", "RU": "🇷🇺", "UA": "🇺🇦", "BY": "🇧🇾",
     "MD": "🇲🇩", "RO": "🇷🇴", "BG": "🇧🇬", "RS": "🇷🇸",
     "HR": "🇭🇷", "BA": "🇧🇦", "MK": "🇲🇰", "AL": "🇦🇱",
-    "ME": "🇲🇪", "SI": "🇸🇮", "SK": "🇸🇰", "CZ": "🇨🇿",
+    "ME": "🇲🇪", "SI": "🇸🇮", "SK": "🇸🇰", "CZ": "🇨zecz",
     "PL": "🇵🇱", "HU": "🇭🇺", "AT": "🇦🇹", "CH": "🇨🇭",
     "DE": "🇩🇪", "FR": "🇫🇷", "ES": "🇪🇸", "IT": "🇮🇹",
     "PT": "🇵🇹", "GB": "🇬🇧", "IE": "🇮🇪", "NL": "🇳🇱",
@@ -254,9 +247,6 @@ def detect_app_from_message(message, default_app=""):
         return "SNAPCHAT"
     return default_app
 
-def has_get100_access(user_id):
-    return GET100_ENABLED or user_id in GET100_USERS or user_id == ADMIN_ID
-
 # =============================================
 #         OTP CHANNEL FORWARD
 # =============================================
@@ -303,7 +293,6 @@ async def fresh_login():
     return session.get("token"), session.get("session")
 
 async def check_joined(user_id, bot):
-    # Caching removed as per request for instant check
     try:
         member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
         joined = member.status in ["member", "administrator", "creator"]
@@ -817,15 +806,6 @@ async def cmd_get(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data[user_id]["name"] = user.first_name or "User"
     await do_get_number(update.message, user_id, count=1, user_name=user.first_name, bot=context.bot)
 
-async def cmd_get100(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    user_id = user.id
-    init_user(user_id)
-    if not has_get100_access(user_id):
-        await update.message.reply_text("❌ আপনার Get 100 access নেই।")
-        return
-    await do_get_number(update.message, user_id, count=100, user_name=user.first_name, bot=context.bot)
-
 async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     init_user(user_id)
@@ -855,8 +835,6 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📊  BOT STATS\n"
         f"━━━━━━━━━━━━━━━━━━\n\n"
         f"👥  Users: {len(user_data)}\n"
-        f"📦  Get 100: {'✅ ON' if GET100_ENABLED else '❌ OFF'}\n"
-        f"👤  Get 100 Users: {len(GET100_USERS)}\n"
         f"🕐  {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
         f"━━━━━━━━━━━━━━━━━━"
     )
@@ -893,48 +871,6 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_data[ADMIN_ID]["waiting_for"] = "broadcast"
     await update.message.reply_text("📢 সবাইকে কী message পাঠাবেন?")
-
-async def cmd_get100on(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global GET100_ENABLED
-    if update.effective_user.id != ADMIN_ID:
-        return
-    GET100_ENABLED = True
-    await update.message.reply_text("✅ Get 100 সবার জন্য চালু করা হয়েছে।")
-
-async def cmd_get100off(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global GET100_ENABLED
-    if update.effective_user.id != ADMIN_ID:
-        return
-    GET100_ENABLED = False
-    await update.message.reply_text("❌ Get 100 সবার জন্য বন্ধ করা হয়েছে।")
-
-async def cmd_addget100(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        return
-    args = context.args
-    if not args:
-        await update.message.reply_text("Usage: /addget100 <user_id>")
-        return
-    try:
-        uid = int(args[0])
-        GET100_USERS.add(uid)
-        await update.message.reply_text(f"✅ User {uid} কে Get 100 access দেওয়া হয়েছে।")
-    except:
-        await update.message.reply_text("❌ Invalid user ID.")
-
-async def cmd_removeget100(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        return
-    args = context.args
-    if not args:
-        await update.message.reply_text("Usage: /removeget100 <user_id>")
-        return
-    try:
-        uid = int(args[0])
-        GET100_USERS.discard(uid)
-        await update.message.reply_text(f"❌ User {uid} এর Get 100 access সরানো হয়েছে।")
-    except:
-        await update.message.reply_text("❌ Invalid user ID.")
 
 # =============================================
 #         CALLBACK HANDLER
@@ -1281,14 +1217,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if text == "📊 Dashboard":
-        data = await api_get_info()
-        stats = data.get("data", {}).get("stats", {}) if data.get("meta", {}).get("code") == 200 else {}
-        
         dashboard_msg = (
             f"👤 Name: {user_name}\n"
             f"🆔 ID: {user_id}\n"
-            f"📊 Today OTP: {stats.get('success_count', 0)}\n"
-            f"📈 All Time OTP: {stats.get('success_count', 0)}\n"
+            f"📊 Today OTP: 0\n"
+            f"📈 All Time OTP: 0\n"
             f"💰 Balance: 0.00"
         )
         await update.message.reply_text(dashboard_msg, reply_markup=main_keyboard(user_id))
@@ -1346,15 +1279,10 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("stop", cmd_stop, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("get", cmd_get, filters=filters.ChatType.PRIVATE))
-    app.add_handler(CommandHandler("get100", cmd_get100, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("allusers", cmd_allusers, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("stats", cmd_stats, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("apistatus", cmd_apistatus, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("broadcast", cmd_broadcast, filters=filters.ChatType.PRIVATE))
-    app.add_handler(CommandHandler("get100on", cmd_get100on, filters=filters.ChatType.PRIVATE))
-    app.add_handler(CommandHandler("get100off", cmd_get100off, filters=filters.ChatType.PRIVATE))
-    app.add_handler(CommandHandler("addget100", cmd_addget100, filters=filters.ChatType.PRIVATE))
-    app.add_handler(CommandHandler("removeget100", cmd_removeget100, filters=filters.ChatType.PRIVATE))
     app.add_handler(CommandHandler("refreshsessions", cmd_refreshsessions, filters=filters.ChatType.PRIVATE))
     
     app.add_handler(CallbackQueryHandler(callback_handler))
