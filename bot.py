@@ -139,7 +139,7 @@ class SessionPool:
 session_pool = SessionPool()
 
 ALL_APPS = [
-    "FACEBOOK", "INSTAGRAM", "WHATSAPP", "TELEGRAM"
+    "WHATSAPP", "FACEBOOK", "INSTAGRAM", "TELEGRAM"
 ]
 
 COUNTRY_FLAGS = {
@@ -482,8 +482,9 @@ def country_select_inline(countries, app_name):
     buttons = []
     for c in countries:
         flag = get_flag(c)
+        code = COUNTRY_NAME_TO_CODE.get(c.lower().strip(), c[:2].upper())
         buttons.append([InlineKeyboardButton(
-            f"{flag} {c}", callback_data=f"country_{c}"
+            f"{flag} {c} [{code}]", callback_data=f"country_{c}"
         )])
     buttons.append([InlineKeyboardButton("🔙 Back", callback_data="back_app")])
     return InlineKeyboardMarkup(buttons)
@@ -875,7 +876,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data == "go_home":
-        await query.message.reply_text(
+        await query.edit_message_text(
             "কোন সার্ভিসের নাম্বার চান?",
             reply_markup=app_select_inline()
         )
@@ -970,7 +971,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             asyncio.create_task(auto_otp_multi(query.message, numbers_list, user_id, range_val, bot=context.bot))
         else:
             await query.edit_message_text(
-                "❌ Number পাওয়া যায়নি!",
+                "❌ Number পাওয়া যায়নি।",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔄 Try Again", callback_data=f"same_{range_val}")],
                     [InlineKeyboardButton("🔙 Back", callback_data="go_home")]
@@ -1024,15 +1025,32 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await do_otp_check(query.message, number, user_id, bot=context.bot)
 
     elif data.startswith("same_"):
-        range_val = data.replace("same_", "")
         app_name = user_data[user_id].get("app", "FACEBOOK")
         country = user_data[user_id].get("country", "")
-        user_data[user_id]["range"] = range_val
         user_data[user_id]["name"] = user_name
         
         # রিফ্রেশ বাটনে ক্লিক করলে মেসেজ আপডেট হবে
         await query.edit_message_text("⏳ Buying Number...")
         
+        # রিফ্রেশ করার সময় কনসোল লগের সবচেয়ে লেটেস্ট রেঞ্জটি খুঁজে বের করা হচ্ছে
+        logs = await get_console_logs(force=True)
+        filtered_ranges = []
+        for log in logs:
+            log_app = log.get("app_name", "").replace("*", "").strip().upper()
+            log_country = log.get("country", "").strip()
+            if log_app == app_name.upper() and log_country == country:
+                r = log.get("range", "").strip()
+                t_str = log.get("time", "").strip()
+                if r and t_str:
+                    filtered_ranges.append({"range": r, "time": t_str})
+                    
+        if filtered_ranges:
+            latest_item = max(filtered_ranges, key=lambda x: x["time"])
+            range_val = latest_item["range"]
+        else:
+            range_val = data.replace("same_", "")
+            
+        user_data[user_id]["range"] = range_val
         user_data[user_id]["auto_otp_cancel"] = True
         await asyncio.sleep(0.1)
         user_data[user_id]["auto_otp_cancel"] = False
@@ -1075,7 +1093,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         range_val = data.replace("viewrange_", "")
         app_name = user_data[user_id].get("app", "FACEBOOK")
         user_data[user_id]["range"] = range_val
-        await query.message.reply_text(f"⏳ {range_val} থেকে numbers নেওয়া হচ্ছে...")
+        await query.message.reply_text(f"⏳ {range_val} থেকে numbers নেওয়া হচ্ছে...")
         results = []
         for _ in range(5):
             d = await api_get_number(range_val, app_name)
