@@ -147,7 +147,7 @@ COUNTRY_FLAGS = {
     "TJ": "🇹🇯", "TG": "🇹🇬", "NG": "🇳🇬", "GH": "🇬🇭",
     "KE": "🇰🇪", "BD": "🇧🇩", "IN": "🇮🇳", "PH": "🇵🇭",
     "ID": "🇮🇩", "MM": "🇲🇲", "KH": "🇰🇭", "ET": "🇪🇹",
-    "CD": "🇨드로", "MZ": "🇲🇿", "MG": "🇲🇬", "CI": "🇨🇮",
+    "CD": "🇨🇩", "MZ": "🇲🇿", "MG": "🇲🇬", "CI": "🇨🇮",
     "SN": "🇸🇳", "ML": "🇲🇱", "BF": "🇧🇫", "GN": "🇬🇳",
     "ZM": "🇿🇲", "ZW": "🇿🇼", "RW": "🇷🇼", "UG": "🇺🇬",
     "AO": "🇦🇴", "SD": "🇸🇩", "MR": "🇲🇷", "NE": "🇳🇪",
@@ -159,7 +159,7 @@ COUNTRY_FLAGS = {
     "ZA": "🇿🇦", "NA": "🇳🇦", "BW": "🇧🇼", "LS": "🇱🇸",
     "SZ": "🇸🇿", "EG": "🇪🇬", "LY": "🇱🇾", "TN": "🇹🇳",
     "DZ": "🇩🇿", "MA": "🇲🇦", "MX": "🇲🇽", "BR": "🇧🇷",
-    "CO": "🇨🇴", "PE": "🇵🇪", "VE": "コツ", "AR": "🇦🇷",
+    "CO": "🇨🇴", "PE": "🇵🇪", "VE": "🇻🇪", "AR": "🇦🇷",
     "CL": "🇨🇱", "EC": "🇪🇨", "BO": "🇧🇴", "PY": "🇵🇾",
     "UY": "🇺🇾", "GY": "🇬🇾", "SR": "🇸🇷", "GT": "🇬🇹",
     "HN": "🇭🇳", "SV": "🇸🇻", "NI": "🇳🇮", "CR": "🇨🇷",
@@ -174,7 +174,7 @@ COUNTRY_FLAGS = {
     "MN": "🇲🇳", "RU": "🇷🇺", "UA": "🇺🇦", "BY": "🇧🇾",
     "MD": "🇲🇩", "RO": "🇷🇴", "BG": "🇧🇬", "RS": "🇷🇸",
     "HR": "🇭🇷", "BA": "🇧🇦", "MK": "🇲🇰", "AL": "🇦🇱",
-    "ME": "🇲🇪", "SI": "🇸🇮", "SK": "🇸🇰", "CZ": "🇨zecz",
+    "ME": "🇲🇪", "SI": "🇸🇮", "SK": "🇸🇰", "CZ": "🇨🇿",
     "PL": "🇵🇱", "HU": "🇭🇺", "AT": "🇦🇹", "CH": "🇨🇭",
     "DE": "🇩🇪", "FR": "🇫🇷", "ES": "🇪🇸", "IT": "🇮🇹",
     "PT": "🇵🇹", "GB": "🇬🇧", "IE": "🇮🇪", "NL": "🇳🇱",
@@ -497,17 +497,6 @@ def carrier_select_inline(carriers, app_name, country):
     buttons.append([InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")])
     return InlineKeyboardMarkup(buttons)
 
-def range_select_inline(ranges, app_name, country, carrier):
-    buttons = []
-    for r in ranges[:20]:
-        buttons.append([InlineKeyboardButton(
-            f"📡 {r['range']}", callback_data=f"range_{r['range']}"
-        )])
-    buttons.append([InlineKeyboardButton(
-        "🔙 Back", callback_data=f"back_country_{app_name}"
-    )])
-    return InlineKeyboardMarkup(buttons)
-
 def admin_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("👥 All Users", callback_data="admin_users"),
@@ -517,13 +506,13 @@ def admin_keyboard():
 def after_number_inline(number, range_val):
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🔄 Refresh", callback_data=f"same_{range_val}")],
-        [InlineKeyboardButton("🔙 Back", callback_data=f"back_range_{range_val}")],
+        [InlineKeyboardButton("🔙 Back", callback_data="go_home")],
     ])
 
 def otp_not_found_inline(number, range_val):
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🔄 Refresh", callback_data=f"same_{range_val}")],
-        [InlineKeyboardButton("🔙 Back", callback_data=f"back_range_{range_val}")],
+        [InlineKeyboardButton("🔙 Back", callback_data="go_home")],
     ])
 
 # =============================================
@@ -653,7 +642,7 @@ async def do_get_number(message, user_id, count=1, user_name="User", bot=None):
     if not range_val:
         await message.reply_text(
             "❌ Range select করা হয়নি!\n\n"
-            "🏠 Start → Service → Country → Carrier → Range",
+            "🏠 Start → Service → Country",
             reply_markup=main_keyboard(user_id)
         )
         return
@@ -793,7 +782,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🌐  VIRTUAL NUMBER BOT\n\n"
         f"🔗  API Status: {api_status}\n\n"
         f"📌  কিভাবে ব্যবহার করবেন 👇\n"
-        f"Service → Country → Range → Number → OTP\n\n"
+        f"Service → Country → Number → OTP\n\n"
         f"👇  নিচে Service Select করুন\n"
         f"━━━━━━━━━━━━━━━━━━",
         reply_markup=main_keyboard(user_id)
@@ -928,29 +917,65 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id]["country"] = country
         user_data[user_id]["carrier"] = None
         user_data[user_id]["range"] = None
-        await query.edit_message_text("⏳ Range লোড হচ্ছে...")
+        await query.edit_message_text("⏳ Buying Number...")
+        
         logs = await get_console_logs()
-        seen = set()
-        ranges = []
+        filtered_ranges = []
         for log in logs:
             log_app = log.get("app_name", "").replace("*", "").strip().upper()
             log_country = log.get("country", "").strip()
             if log_app == app_name.upper() and log_country == country:
                 r = log.get("range", "").strip()
-                if r and r not in seen:
-                    seen.add(r)
-                    ranges.append({"range": r, "time": log.get("time", "")})
-        if not ranges:
+                t_str = log.get("time", "").strip()
+                if r and t_str:
+                    filtered_ranges.append({"range": r, "time": t_str})
+                    
+        if not filtered_ranges:
             await query.edit_message_text(
                 f"❌ {country} এ কোনো Range নেই।",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")]])
             )
             return
-        flag = get_flag(country)
-        await query.edit_message_text(
-            f"✅ {app_name}  |  {flag} {country}\n\n📡 Range Select করুন।",
-            reply_markup=range_select_inline(ranges, app_name, country, "")
-        )
+            
+        latest_item = max(filtered_ranges, key=lambda x: x["time"])
+        range_val = latest_item["range"]
+        
+        user_data[user_id]["range"] = range_val
+        user_data[user_id]["auto_otp_cancel"] = False
+        
+        numbers_list = []
+        country_r = country
+        flag = "🌍"
+        
+        for _ in range(4):
+            data_r = await api_get_number(range_val, app_name)
+            if data_r.get("meta", {}).get("code") == 200:
+                num = data_r["data"]
+                number = num.get("number") or num.get("num") or "N/A"
+                numbers_list.append(number)
+                country_r = num.get("country", country)
+                user_data[user_id]["last_number"] = number
+                flag = get_flag(country_r)
+
+        if numbers_list:
+            numbers_text = "\n".join([f" {flag} `{str(num).replace('+', '').strip()}` 🟢" for num in numbers_list])
+            await query.edit_message_text(
+                f"📞 Number পাওয়া গেছে।\n\n"
+                f"{numbers_text}\n\n"
+                f"✅ {app_name}  {flag} {country_r}\n\n"
+                f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
+                parse_mode="Markdown",
+                reply_markup=after_number_inline(numbers_list[0], range_val)
+            )
+            asyncio.create_task(auto_otp_multi(query.message, numbers_list, user_id, range_val, bot=context.bot))
+        else:
+            await query.edit_message_text(
+                "❌ Number পাওয়া যায়নি!",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔄 Try Again", callback_data=f"same_{range_val}")],
+                    [InlineKeyboardButton("🔙 Back", callback_data="go_home")]
+                ])
+            )
 
     elif data.startswith("back_country_"):
         app_name = data.replace("back_country_", "")
@@ -978,8 +1003,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         flag = get_flag(country)
         await query.edit_message_text(
-            f"✅ {app_name}  |  {flag} {country}  |  📶 {carrier}\n\n📡 Range Select করুন।",
-            reply_markup=range_select_inline(ranges, app_name, country, carrier)
+            f"✅ {app_name}  |  {flag} {country}  |  📶 {carrier}\n\n📡 Range Select করুন।"
         )
 
     elif data.startswith("back_carrier_"):
@@ -993,73 +1017,6 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"✅ {app_name}  |  {flag} {country}\n\n📶 Carrier select করুন:",
             reply_markup=carrier_select_inline(carriers, app_name, country)
         )
-
-    elif data.startswith("back_range_"):
-        # নাম্বার পেজ থেকে ব্যাক দিলে এখন রেঞ্জ সিলেক্ট পেজে নিয়ে আসবে
-        country = user_data[user_id].get("country", "")
-        app_name = user_data[user_id].get("app", "FACEBOOK")
-        await query.edit_message_text("⏳ Loading Range Menu...")
-        logs = await get_console_logs()
-        seen = set()
-        ranges = []
-        for log in logs:
-            log_app = log.get("app_name", "").replace("*", "").strip().upper()
-            log_country = log.get("country", "").strip()
-            if log_app == app_name.upper() and log_country == country:
-                r = log.get("range", "").strip()
-                if r and r not in seen:
-                    seen.add(r)
-                    ranges.append({"range": r, "time": log.get("time", "")})
-        flag = get_flag(country)
-        await query.edit_message_text(
-            f"✅ {app_name}  |  {flag} {country}\n\n📡 Range Select করুন।",
-            reply_markup=range_select_inline(ranges, app_name, country, "")
-        )
-
-    elif data.startswith("range_"):
-        range_val = data.replace("range_", "")
-        app_name = user_data[user_id].get("app", "FACEBOOK")
-        country = user_data[user_id].get("country", "")
-        user_data[user_id]["range"] = range_val
-        user_data[user_id]["auto_otp_cancel"] = False
-        
-        # রেঞ্জ সিলেক্ট করলে 'Buying Number' মেসেজ আপডেট হবে
-        await query.edit_message_text("⏳ Buying Number...")
-        
-        numbers_list = []
-        country_r = country
-        flag = "🌍"
-        
-        for _ in range(4):
-            data_r = await api_get_number(range_val, app_name)
-            if data_r.get("meta", {}).get("code") == 200:
-                num = data_r["data"]
-                number = num.get("number") or num.get("num") or "N/A"
-                numbers_list.append(number)
-                country_r = num.get("country", country)
-                user_data[user_id]["last_number"] = number
-                flag = get_flag(country_r)
-
-        if numbers_list:
-            numbers_text = "\n".join([f" {flag} `{str(num).replace('+', '').strip()}` 🟢" for num in numbers_list])
-            # Buying Number মেসেজ সরিয়ে রেজাল্ট শো করানো
-            await query.edit_message_text(
-                f"📞 Number পাওয়া গেছে।\n\n"
-                f"{numbers_text}\n\n"
-                f"✅ {app_name}  {flag} {country_r}\n\n"
-                f"🔥 ওটিপি আসা মাত্রই নিচে শো করবে।",
-                parse_mode="Markdown",
-                reply_markup=after_number_inline(numbers_list[0], range_val)
-            )
-            asyncio.create_task(auto_otp_multi(query.message, numbers_list, user_id, range_val, bot=context.bot))
-        else:
-            await query.edit_message_text(
-                "❌ Number পাওয়া যায়নি!",
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🔄 Try Again", callback_data=f"range_{range_val}")],
-                    [InlineKeyboardButton("🔙 Back", callback_data=f"back_range_{range_val}")]
-                ])
-            )
 
     elif data.startswith("otp_"):
         number = data.replace("otp_", "")
@@ -1109,8 +1066,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(
                 "❌ Number পাওয়া যায়নি!",
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🔄 Try Again", callback_data=f"range_{range_val}")],
-                    [InlineKeyboardButton("🔙 Back", callback_data=f"back_range_{range_val}")]
+                    [InlineKeyboardButton("🔄 Try Again", callback_data=f"same_{range_val}")],
+                    [InlineKeyboardButton("🔙 Back", callback_data="go_home")]
                 ])
             )
 
