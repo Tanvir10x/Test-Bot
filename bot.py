@@ -166,7 +166,7 @@ COUNTRY_FLAGS = {
     "ZA": "🇿🇦", "NA": "🇳🇦", "BW": "🇧🇼", "LS": "🇱🇸",
     "SZ": "🇸🇿", "EG": "🇪🇬", "LY": "🇱🇾", "TN": "🇹🇳",
     "DZ": "🇩🇿", "MA": "🇲🇦", "MX": "🇲🇽", "BR": "🇧🇷",
-    "CO": "🇨🇴", "PE": "🇵🇪", "VE": "🇻🇪", "AR": "🇦🇷",
+    "CO": "🇨🇴", "PE": "🇵🇪", "VE": "コツ", "AR": "🇦🇷",
     "CL": "🇨🇱", "EC": "🇪🇨", "BO": "🇧🇴", "PY": "🇵🇾",
     "UY": "🇺🇾", "GY": "🇬🇾", "SR": "🇸🇷", "GT": "🇬🇹",
     "HN": "🇭🇳", "SV": "🇸🇻", "NI": "🇳🇮", "CR": "🇨🇷",
@@ -302,17 +302,11 @@ async def fresh_login():
     session = await session_pool._login_once()
     return session.get("token"), session.get("session")
 
-_join_cache = {}
-
 async def check_joined(user_id, bot):
-    now = time.time()
-    cached = _join_cache.get(user_id)
-    if cached and (now - cached["time"]) < 600:
-        return cached["joined"]
+    # Caching removed as per request for instant check
     try:
         member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
         joined = member.status in ["member", "administrator", "creator"]
-        _join_cache[user_id] = {"joined": joined, "time": now}
         return joined
     except:
         return True
@@ -791,11 +785,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     joined = await check_joined(user_id, context.bot)
     if not joined:
         await update.message.reply_text(
-            "⚠️ Channel Join করুন!\n\n"
-            "Bot ব্যবহার করতে আমাদের channel join করতে হবে।\n\n"
-            "👇 নিচের button চাপুন, তারপর /start দিন।",
+            "⚠️ Channel Join করুন।\n\n"
+            "Bot ব্যবহার করতে আমাদের Channel Join করতে হবে।\n\n"
+            "👇 নিচের Button চাপুন তারপর /start দিন।",
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("✅ Channel Join করুন", url=CHANNEL_LINK)
+                InlineKeyboardButton("Join Channel", url=CHANNEL_LINK)
             ]])
         )
         return
@@ -1012,7 +1006,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     ranges.append({"range": r, "time": log.get("time", "")})
         if not ranges:
             await query.edit_message_text(
-                f"❌ {country} তে কোনো range নেই।",
+                f"❌ {country} এ কোনো Range নেই।",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data=f"back_country_{app_name}")]])
             )
             return
@@ -1255,9 +1249,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     joined = await check_joined(user_id, context.bot)
     if not joined:
         await update.message.reply_text(
-            "⚠️ Channel Join করুন!\n\nJoin করে /start দিন।",
+            "⚠️ Channel Join করুন।\n\nJoin করে /start দিন।",
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("✅ Channel Join করুন", url=CHANNEL_LINK)
+                InlineKeyboardButton("Join Channel", url=CHANNEL_LINK)
             ]])
         )
         return
@@ -1347,20 +1341,24 @@ async def post_shutdown(application):
 
 if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).read_timeout(30).write_timeout(30).connect_timeout(30).post_init(post_init).post_shutdown(post_shutdown).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("stop", cmd_stop))
-    app.add_handler(CommandHandler("get", cmd_get))
-    app.add_handler(CommandHandler("get100", cmd_get100))
-    app.add_handler(CommandHandler("allusers", cmd_allusers))
-    app.add_handler(CommandHandler("stats", cmd_stats))
-    app.add_handler(CommandHandler("apistatus", cmd_apistatus))
-    app.add_handler(CommandHandler("broadcast", cmd_broadcast))
-    app.add_handler(CommandHandler("get100on", cmd_get100on))
-    app.add_handler(CommandHandler("get100off", cmd_get100off))
-    app.add_handler(CommandHandler("addget100", cmd_addget100))
-    app.add_handler(CommandHandler("removeget100", cmd_removeget100))
-    app.add_handler(CommandHandler("refreshsessions", cmd_refreshsessions))
+    
+    # Applied Private Chat filters to restrict responses to Private Inbox only
+    app.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("stop", cmd_stop, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("get", cmd_get, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("get100", cmd_get100, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("allusers", cmd_allusers, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("stats", cmd_stats, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("apistatus", cmd_apistatus, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("broadcast", cmd_broadcast, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("get100on", cmd_get100on, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("get100off", cmd_get100off, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("addget100", cmd_addget100, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("removeget100", cmd_removeget100, filters=filters.ChatType.PRIVATE))
+    app.add_handler(CommandHandler("refreshsessions", cmd_refreshsessions, filters=filters.ChatType.PRIVATE))
+    
     app.add_handler(CallbackQueryHandler(callback_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_message))
+    
     print("✅ Bot is running...")
     app.run_polling(drop_pending_updates=True, timeout=30)
